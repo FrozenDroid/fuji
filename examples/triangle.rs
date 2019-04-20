@@ -224,22 +224,24 @@ impl HelloTriangle {
         loop {
             let mut done = false;
 
-            self.fuji.events_loop_mut().poll_events(|ev| {
-                match ev {
-                    Event::WindowEvent { event: WindowEvent::CloseRequested, .. } => {
-                        done = true;
-                    },
-                    Event::WindowEvent { event: WindowEvent::KeyboardInput { input, .. }, .. } => {
-                        match input.virtual_keycode {
-                            Some(VirtualKeyCode::Escape) => {
-                                done = true;
-                            },
-                            _ => ()
-                        }
-                    },
-                    _ => ()
-                }
-            });
+            if let Ok(ref mut e) = self.fuji.events_loop().write() {
+                e.poll_events(|ev| {
+                    match ev {
+                        Event::WindowEvent { event: WindowEvent::CloseRequested, .. } => {
+                            done = true;
+                        },
+                        Event::WindowEvent { event: WindowEvent::KeyboardInput { input, .. }, .. } => {
+                            match input.virtual_keycode {
+                                Some(VirtualKeyCode::Escape) => {
+                                    done = true;
+                                },
+                                _ => ()
+                            }
+                        },
+                        _ => ()
+                    }
+                });
+            }
 
             self.draw_frame();
 

@@ -9,7 +9,7 @@ use std::ffi::CString;
 use std::fmt;
 use std::iter::FromIterator;
 use std::ops::Deref;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex, RwLock};
 use vulkano::buffer::BufferAccess;
 use vulkano::buffer::TypedBufferAccess;
 use vulkano::device::Device;
@@ -315,7 +315,7 @@ impl FujiDeviceBuilder {
         let device          = self.create_logical_device(physical_device.get())?;
 
         let (events_loop, surface) = self.window_handles
-            .map(|(e, s)| (Some(e), Some(s)))
+            .map(|(e, s)| (Some(e.into()), Some(s)))
             .unwrap_or((None, None));
 
         let mut fuji = Fuji {
@@ -436,7 +436,7 @@ pub struct Fuji {
     instance:       Arc<Instance>,
     debug_callback: Option<DebugCallback>,
 
-    events_loop: Option<EventsLoop>,
+    events_loop: Option<RwLock<EventsLoop>>,
     surface:     Option<Arc<Surface<Window>>>,
 
     physical_device: PhysicalDeviceFacade,
@@ -479,7 +479,7 @@ impl Fuji {
     getters! {
         instance:         Arc<Instance>,
         debug_callback:   opt DebugCallback,
-        events_loop:      opt EventsLoop,
+        events_loop:      opt RwLock<EventsLoop>,
         surface:          opt Arc<Surface<Window>>,
         physical_device:  PhysicalDeviceFacade,
         device:           Arc<Device>,
